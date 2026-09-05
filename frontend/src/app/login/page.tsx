@@ -97,9 +97,6 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        <div className="mt-6 pt-6 border-t border-slate-800 text-xs text-slate-400 text-center font-medium">
-          Demo User: <code className="bg-slate-950 border border-slate-800 px-1.5 py-0.5 text-[#F99B4F] rounded-[6px]">john@example.com</code> / <code className="bg-slate-950 border border-slate-800 px-1.5 py-0.5 text-[#F99B4F] rounded-[6px]">Password123!</code>
-        </div>
       </div>
     </div>
   );
