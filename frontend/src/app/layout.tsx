@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Mini Kanban Board',
   description: 'Production-ready modern Kanban board application',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
