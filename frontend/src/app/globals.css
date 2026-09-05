@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased min-h-screen font-sans;
+  }
+}
+
+/* Strictly NO box shadow anywhere */
+* {
+  box-shadow: none !important;
+}
+
+/* Global smooth transition for all interactive elements */
+button, a, input, select, textarea, div[role="button"] {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Premium micro-animations for hover & active click states */
+button:hover, a:hover {
+  filter: brightness(1.06);
+}
+
+button:active, a:active {
+  transform: scale(0.97) !important;
+}
+
+/* Force border-radius to 6px across cards/modals/inputs while preserving rounded-full for circular elements */
+.rounded-xl, .rounded-2xl, .rounded-lg, .rounded-md, .rounded-10px, .rounded-[10px], .rounded-6px, .rounded-[6px] {
+  border-radius: 6px !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+/* Custom dark theme scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
