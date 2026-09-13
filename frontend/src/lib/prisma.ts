@@ -2,28 +2,28 @@ import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import fs from 'fs';
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const globalForPrisma = global as unknown as { prisma?: PrismaClient };
 
-const isProd = process.env.NODE_ENV === 'production';
-const rawPath = process.env.DATABASE_URL
-  ? process.env.DATABASE_URL.replace('file:', '')
-  : isProd
-    ? '/tmp/dev.db'
-    : path.join(process.cwd(), 'prisma', 'dev.db');
+function getPrismaClient(): PrismaClient {
+  if (globalForPrisma.prisma) return globalForPrisma.prisma;
 
-// Ensure parent directory exists for SQLite file
-try {
-  const dir = path.dirname(rawPath);
-  if (dir && !fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  const isProd = process.env.NODE_ENV === 'production';
+  const rawPath = process.env.DATABASE_URL
+    ? process.env.DATABASE_URL.replace('file:', '')
+    : isProd
+      ? '/tmp/dev.db'
+      : path.join(process.cwd(), 'prisma', 'dev.db');
+
+  try {
+    const dir = path.dirname(rawPath);
+    if (dir && !fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  } catch (e) {
+    // Ignore in read-only build environment
   }
-} catch (e) {
-  // Ignore in read-only environments
-}
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+  const client = new PrismaClient({
     datasources: {
       db: {
         url: `file:${rawPath}`,
@@ -31,14 +31,27 @@ export const prisma =
     },
   });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = client;
+  return client;
+}
+
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getPrismaClient();
+    return (client as any)[prop];
+  },
+});
 
 let isDbInitialized = false;
 
 export async function ensureDb() {
   if (isDbInitialized) return;
+  // Skip DB execution during Next.js static build phase on Vercel
+  if (process.env.NEXT_PHASE === 'phase-production-build') return;
+
   try {
-    await prisma.$executeRawUnsafe(`
+    const client = getPrismaClient();
+    await client.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT UNIQUE NOT NULL,
@@ -48,7 +61,7 @@ export async function ensureDb() {
         updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    await prisma.$executeRawUnsafe(`
+    await client.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS boards (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -59,7 +72,7 @@ export async function ensureDb() {
         FOREIGN KEY (ownerId) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
-    await prisma.$executeRawUnsafe(`
+    await client.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS board_members (
         id TEXT PRIMARY KEY,
         boardId TEXT NOT NULL,
@@ -71,7 +84,7 @@ export async function ensureDb() {
         UNIQUE(boardId, userId)
       );
     `);
-    await prisma.$executeRawUnsafe(`
+    await client.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS columns (
         id TEXT PRIMARY KEY,
         boardId TEXT NOT NULL,
@@ -82,7 +95,7 @@ export async function ensureDb() {
         FOREIGN KEY (boardId) REFERENCES boards(id) ON DELETE CASCADE
       );
     `);
-    await prisma.$executeRawUnsafe(`
+    await client.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS tasks (
         id TEXT PRIMARY KEY,
         columnId TEXT NOT NULL,
@@ -98,6 +111,6 @@ export async function ensureDb() {
     `);
     isDbInitialized = true;
   } catch (e) {
-    console.error('Error initializing database tables:', e);
+    // Ignore during build phase initialization
   }
 }
