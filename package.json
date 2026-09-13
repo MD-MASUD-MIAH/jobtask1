@@ -13,8 +13,10 @@
     "db:migrate": "npm --prefix backend run prisma:migrate",
     "db:seed": "npm --prefix backend run prisma:seed"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.2",
+  "dependencies": {
     "next": "14.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
