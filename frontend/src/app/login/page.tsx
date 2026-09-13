@@ -24,7 +24,14 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/dashboard');
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Failed to sign in. Please check your credentials.';
+      let msg = 'Failed to sign in. Please check your credentials.';
+      if (err.response?.data?.message) {
+        msg = Array.isArray(err.response.data.message)
+          ? err.response.data.message.join(', ')
+          : err.response.data.message;
+      } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        msg = 'Network Error: Cannot connect to Backend server. Please ensure backend is running or set NEXT_PUBLIC_API_URL in Vercel.';
+      }
       setError(msg);
     } finally {
       setSubmitting(false);

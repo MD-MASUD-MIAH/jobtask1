@@ -25,9 +25,9 @@ async function bootstrap() {
   // Global Exception Filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // CORS Configuration
+  // CORS Configuration - Allow all origins for Vercel and local dev
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: true,
     credentials: true,
   });
 
