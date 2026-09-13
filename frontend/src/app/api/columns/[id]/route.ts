@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma, ensureDb } from '@/lib/prisma';
 import { getUserIdFromRequest } from '@/lib/jwt';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     await ensureDb();

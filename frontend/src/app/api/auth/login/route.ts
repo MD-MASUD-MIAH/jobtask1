@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 import { prisma, ensureDb } from '@/lib/prisma';
 import { signToken } from '@/lib/jwt';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   try {
     await ensureDb();

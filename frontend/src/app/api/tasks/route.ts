@@ -3,6 +3,9 @@ import { prisma, ensureDb } from '@/lib/prisma';
 import { getUserIdFromRequest } from '@/lib/jwt';
 import { v4 as uuidv4 } from 'uuid';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   try {
     await ensureDb();

@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma, ensureDb } from '@/lib/prisma';
 import { getUserIdFromRequest } from '@/lib/jwt';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
     await ensureDb();
@@ -17,7 +20,6 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       orderBy: { orderIndex: 'asc' },
     });
 
-    // Remove moving task if it's already in the same column
     const filteredTasks = tasksInColumn.filter((t) => t.id !== params.id);
     const targetIdx = Math.max(0, Math.min(newPositionIndex, filteredTasks.length));
 
