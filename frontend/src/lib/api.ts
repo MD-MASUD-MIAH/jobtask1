@@ -1,6 +1,15 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+let rawUrl = (process.env.NEXT_PUBLIC_API_URL || '/api').trim();
+if (rawUrl.includes('your-backend-api') || rawUrl.includes('example.com')) {
+  rawUrl = '/api';
+}
+rawUrl = rawUrl.replace(/\/+$/, '');
+if (rawUrl.startsWith('http') && !rawUrl.endsWith('/api')) {
+  rawUrl = `${rawUrl}/api`;
+}
+
+const API_BASE_URL = rawUrl;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
